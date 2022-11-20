@@ -19,5 +19,6 @@ module.exports = {
   rules: {
     'react/jsx-filename-extension': 'off',
     'react/prop-types': 'off',
+    'import/no-named-as-default-member': 'off',
   },
 };

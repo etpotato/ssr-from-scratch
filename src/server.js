@@ -3,7 +3,8 @@ import path from 'path';
 import { readFileSync } from 'fs';
 import express from 'express';
 import React from 'react';
-import { renderToPipeableStream } from 'react-dom/server';
+import { renderToString } from 'react-dom/server';
+import { StaticRouter } from 'react-router-dom/server';
 import fetch from 'node-fetch';
 import App from './public/App';
 
@@ -23,20 +24,25 @@ const html = readFileSync(path.resolve(__dirname, 'public', 'index.html')).toStr
 
 app.use('/static', express.static(path.resolve(__dirname, 'public')));
 
-app.get('/', async (_req, res) => {
+app.get('*', async (req, res) => {
   try {
     const initialData = await getData();
-    const htmlWithData = html.replace('<!-- __INITIAL_DATA__ -->', JSON.stringify({ products: initialData }));
+    const htmlWithData = html.replace(
+      '<!-- __INITIAL_DATA__ -->',
+      JSON.stringify({ products: initialData }),
+    );
     const [htmlStart, htmlEnd] = htmlWithData.split('<!-- __APP__ -->');
 
     res.write(htmlStart);
 
-    const componentStream = renderToPipeableStream(<App products={initialData} />);
+    const react = renderToString(
+      <StaticRouter location={req.url} context={initialData}>
+        <App />
+      </StaticRouter>,
+    );
 
-    componentStream.pipe(res, { end: false });
-
-    componentStream.on('end', () => res.write(htmlEnd));
-
+    res.write(react);
+    res.write(htmlEnd);
     res.end();
   } catch (err) {
     console.error(err);

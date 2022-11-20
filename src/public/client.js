@@ -1,12 +1,15 @@
 import React from 'react';
 import { hydrateRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 
 const container = document.getElementById('root');
 hydrateRoot(
   container,
   <React.StrictMode>
-    {/* eslint-disable-next-line no-underscore-dangle */}
-    <App products={window.__INITIAL_DATA__.products} />
+    <BrowserRouter>
+      {/* eslint-disable-next-line no-underscore-dangle */}
+      <App products={window.__INITIAL_DATA__.products} />
+    </BrowserRouter>
   </React.StrictMode>,
 );
