@@ -4,7 +4,7 @@ import {
   Button, List, ListItemButton, ListItemText, Typography,
 } from '@mui/material';
 
-export default function Products({ products }) {
+export default function Products({ items }) {
   const [count, setCount] = useState(0);
 
   return (
@@ -17,9 +17,9 @@ export default function Products({ products }) {
       <Button variant="contained" onClick={() => setCount((state) => state + 1)}>increment</Button>
       <Button variant="contained" onClick={() => setCount((state) => state - 1)}>decrement</Button>
       <List>
-        { products?.map((product) => (
-          <ListItemButton key={product.id}>
-            <ListItemText>{product.title}</ListItemText>
+        { items?.map((item) => (
+          <ListItemButton key={item.id}>
+            <ListItemText>{item.title}</ListItemText>
           </ListItemButton>
         ))}
       </List>

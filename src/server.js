@@ -13,7 +13,7 @@ const getData = async () => {
   try {
     const res = await fetch('https://dummyjson.com/products/?limit=20');
     const data = await res.json();
-    return data.products;
+    return data;
   } catch (err) {
     console.error(err);
     return 'an error occured while fetching data';
@@ -50,7 +50,7 @@ app.get('*', async (req, res) => {
     const initialData = await getData();
     const react = renderToString(
       <StaticRouter location={req.url}>
-        <App />
+        <App data={initialData} />
       </StaticRouter>,
     );
     const html = getHtml({ favicon: FAVICON, initialData, react });

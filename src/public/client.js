@@ -9,7 +9,7 @@ hydrateRoot(
   <React.StrictMode>
     <BrowserRouter>
       {/* eslint-disable-next-line no-underscore-dangle */}
-      <App products={window.__INITIAL_DATA__.products} />
+      <App data={window.__INITIAL_DATA__} />
     </BrowserRouter>
   </React.StrictMode>,
 );
