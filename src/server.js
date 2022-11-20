@@ -5,7 +5,9 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom/server';
 import fetch from 'node-fetch';
+
 import App from './public/App';
+import { FAVICON } from './const';
 
 const getData = async () => {
   try {
@@ -18,14 +20,17 @@ const getData = async () => {
   }
 };
 
-const getHtml = ({ title, initialData, react }) => `
+const getHtml = ({
+  title, favicon, initialData, react,
+}) => `
   <!DOCTYPE html>
   <html lang="en">
   <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title}</title>
+    <title>${title || 'ssr demo app'}</title>
+    <link href="${favicon}" rel="shortcut icon" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"/>
     <script>window.__INITIAL_DATA__ = ${JSON.stringify(initialData)}</script>
     <script defer src="static/client.bundle.js"></script>
@@ -48,7 +53,7 @@ app.get('*', async (req, res) => {
         <App />
       </StaticRouter>,
     );
-    const html = getHtml({ initialData, react });
+    const html = getHtml({ favicon: FAVICON, initialData, react });
 
     res.send(html);
   } catch (err) {
