@@ -6,6 +6,7 @@ const container = document.getElementById('root');
 hydrateRoot(
   container,
   <React.StrictMode>
-    <App text={window.__INITIAL_DATA__.text}/>
-  </React.StrictMode>
+    {/* eslint-disable-next-line no-underscore-dangle */}
+    <App products={window.__INITIAL_DATA__.products} />
+  </React.StrictMode>,
 );

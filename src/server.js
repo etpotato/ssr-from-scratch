@@ -1,16 +1,17 @@
+/* eslint-disable no-console */
 import path from 'path';
-import express  from 'express';
+import { readFileSync } from 'fs';
+import express from 'express';
 import React from 'react';
-import { renderToString } from 'react-dom/server';
+import { renderToPipeableStream } from 'react-dom/server';
 import fetch from 'node-fetch';
 import App from './public/App';
 
 const getData = async () => {
   try {
-    const random = Math.floor(Math.random() * 100) + 1;
-    const res = await fetch(`https://jsonplaceholder.typicode.com/posts/${random}`);
+    const res = await fetch('https://dummyjson.com/products/?limit=20');
     const data = await res.json();
-    return data.body;
+    return data.products;
   } catch (err) {
     console.error(err);
     return 'an error occured while fetching data';
@@ -18,27 +19,28 @@ const getData = async () => {
 };
 
 const app = express();
+const html = readFileSync(path.resolve(__dirname, 'public', 'index.html')).toString();
 
 app.use('/static', express.static(path.resolve(__dirname, 'public')));
 
 app.get('/', async (_req, res) => {
-  const initialData = await getData();
+  try {
+    const initialData = await getData();
+    const htmlWithData = html.replace('<!-- __INITIAL_DATA__ -->', JSON.stringify({ products: initialData }));
+    const [htmlStart, htmlEnd] = htmlWithData.split('<!-- __APP__ -->');
 
-  const component = renderToString(<App text={initialData}/>);
+    res.write(htmlStart);
 
-  const html = `
-    <!doctype html>
-      <html>
-      <head>
-      </head>
-      <body>
-        <div id="root">${component}</div>
-        <script>window.__INITIAL_DATA__ = ${JSON.stringify({ text: initialData })}</script>
-        <script src="/static/client.bundle.js"></script>
-      </body>
-    </html>`;
+    const componentStream = renderToPipeableStream(<App products={initialData} />);
 
-  res.send(html);
+    componentStream.pipe(res, { end: false });
+
+    componentStream.on('end', () => res.write(htmlEnd));
+
+    res.end();
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 const server = app.listen(3000, () => console.log('server is listening on port 3000'));

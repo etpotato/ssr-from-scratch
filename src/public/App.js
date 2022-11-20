@@ -1,15 +1,24 @@
 import React, { useState } from 'react';
+import {
+  Button, List, ListItemButton, ListItemText, Typography,
+} from '@mui/material';
 
-export default function App({ text }) {
+export default function App({ products }) {
   const [count, setCount] = useState(0);
 
   return (
     <>
-      <h1>React ssr test</h1>
-      <p>{ text }</p>
+      <Typography variant="h2" component="h1">React ssr test</Typography>
       <p>{ count }</p>
-      <button type='button' onClick={() => setCount(count => count + 1)}>increment</button>
-      <button type='button' onClick={() => setCount(count => count - 1)}>decrement</button>
+      <Button variant="contained" onClick={() => setCount((state) => state + 1)}>increment</Button>
+      <Button variant="contained" onClick={() => setCount((state) => state - 1)}>decrement</Button>
+      <List>
+        { products.map((product) => (
+          <ListItemButton key={product.id}>
+            <ListItemText>{product.title}</ListItemText>
+          </ListItemButton>
+        ))}
+      </List>
     </>
   );
-};
+}

@@ -1,5 +1,6 @@
-const nodeExternals = require('webpack-node-externals');
 const path = require('path');
+const nodeExternals = require('webpack-node-externals');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const serverConfig = {
   mode: 'development',
@@ -29,7 +30,7 @@ const serverConfig = {
 };
 
 const clientConfig = {
-  mode: 'development',
+  mode: process.env.NODE_ENV || 'development',
   target: 'web',
   entry: path.resolve(__dirname, 'src/public/client.js'),
   module: {
@@ -48,6 +49,12 @@ const clientConfig = {
     path: path.resolve(__dirname, 'dist/public'),
     filename: 'client.bundle.js',
   },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: 'src/public/index.html',
+      publicPath: 'static',
+    }),
+  ],
 };
 
 module.exports = [serverConfig, clientConfig];
