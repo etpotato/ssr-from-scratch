@@ -4,21 +4,10 @@ import express from 'express';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom/server';
-import fetch from 'node-fetch';
 
-import App from './public/App';
 import { FAVICON } from './const';
-
-const getData = async () => {
-  try {
-    const res = await fetch('https://dummyjson.com/products/?limit=20');
-    const data = await res.json();
-    return data;
-  } catch (err) {
-    console.error(err);
-    return 'an error occured while fetching data';
-  }
-};
+import api from './api';
+import App from './public/App';
 
 const getHtml = ({
   title, favicon, initialData, react,
@@ -33,7 +22,7 @@ const getHtml = ({
     <link href="${favicon}" rel="shortcut icon" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"/>
     <script>window.__INITIAL_DATA__ = ${JSON.stringify(initialData)}</script>
-    <script defer src="static/client.bundle.js"></script>
+    <script defer src="/static/client.bundle.js"></script>
   </head>
   <body>
     <div id="root">${react}</div>
@@ -41,20 +30,65 @@ const getHtml = ({
   </html>
 `;
 
+const render = ({ location, initialData }) => {
+  const react = renderToString(
+    <StaticRouter location={location}>
+      <App data={initialData} />
+    </StaticRouter>,
+  );
+  const html = getHtml({ favicon: FAVICON, initialData, react });
+
+  return html;
+};
+
 const app = express();
 
 app.use('/static', express.static(path.resolve(__dirname, 'public')));
 
+app.get('/', async (req, res) => {
+  try {
+    const html = render({ location: req.url, initialData: {} });
+    res.send(html);
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+app.get('/products', async (req, res) => {
+  try {
+    const initialData = await api.getProducts();
+    const html = render({ location: req.url, initialData });
+    res.send(html);
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+app.get('/product/:id', async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const param = Number.isNaN(id) ? undefined : id;
+    const initialData = await api.getProduct(param);
+    console.log(initialData);
+    const html = render({ location: req.url, initialData });
+    res.send(html);
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+app.get('/api/products', async (_req, res) => {
+  try {
+    const data = await api.getProducts();
+    res.send(data);
+  } catch (err) {
+    console.error(err);
+  }
+});
+
 app.get('*', async (req, res) => {
   try {
-    const initialData = await getData();
-    const react = renderToString(
-      <StaticRouter location={req.url}>
-        <App data={initialData} />
-      </StaticRouter>,
-    );
-    const html = getHtml({ favicon: FAVICON, initialData, react });
-
+    const html = render({ location: req.url });
     res.send(html);
   } catch (err) {
     console.error(err);
