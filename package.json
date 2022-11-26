@@ -7,7 +7,8 @@
     "start": "rm -rf dist && webpack && concurrently \"webpack --watch\" \"nodemon dist/server.bundle.js\"",
     "build": "cross-env NODE_ENV=production webpack",
     "build:stats": "cross-env NODE_ENV=production webpack --json=stats.json",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "cross-env NODE_ENV=production && node dist/server.bundle.js"
   },
   "repository": {
     "type": "git",

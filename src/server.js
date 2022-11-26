@@ -45,26 +45,28 @@ const app = express();
 
 app.use('/static', express.static(path.resolve(__dirname, 'public')));
 
-app.get('/', async (req, res) => {
+app.get('/', async (req, res, next) => {
   try {
     const html = render({ location: req.url, initialData: {} });
     res.send(html);
   } catch (err) {
+    next(err);
     console.error(err);
   }
 });
 
-app.get('/products', async (req, res) => {
+app.get('/products', async (req, res, next) => {
   try {
     const initialData = await api.getProducts();
     const html = render({ location: req.url, initialData });
     res.send(html);
   } catch (err) {
+    next(err);
     console.error(err);
   }
 });
 
-app.get('/product/:id', async (req, res) => {
+app.get('/product/:id', async (req, res, next) => {
   try {
     const id = Number(req.params.id);
     const param = Number.isNaN(id) ? undefined : id;
@@ -73,24 +75,27 @@ app.get('/product/:id', async (req, res) => {
     const html = render({ location: req.url, initialData });
     res.send(html);
   } catch (err) {
+    next(err);
     console.error(err);
   }
 });
 
-app.get('/api/products', async (_req, res) => {
+app.get('/api/products', async (_req, res, next) => {
   try {
     const data = await api.getProducts();
     res.send(data);
   } catch (err) {
+    next(err);
     console.error(err);
   }
 });
 
-app.get('*', async (req, res) => {
+app.get('*', async (req, res, next) => {
   try {
     const html = render({ location: req.url });
     res.send(html);
   } catch (err) {
+    next(err);
     console.error(err);
   }
 });
