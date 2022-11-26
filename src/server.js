@@ -7,7 +7,10 @@ import { StaticRouter } from 'react-router-dom/server';
 
 import { FAVICON } from './const';
 import api from './api';
+import redisClient from './redis';
 import App from './public/App';
+
+const PORT = process.env.PORT || 3000;
 
 const getHtml = ({
   title, favicon, initialData, react,
@@ -41,69 +44,79 @@ const render = ({ location, initialData }) => {
   return html;
 };
 
+const sendNotFound = (res) => {
+  const html = render({ location: '/404' });
+  return res.status(404).send(html);
+};
+
 const app = express();
 
 app.use('/static', express.static(path.resolve(__dirname, 'public')));
 
-app.get('/', async (req, res, next) => {
+app.use((req, res, next) => {
+  res.on('finish', () => {
+    console.log(req.method, decodeURI(req.url), res.statusCode, res.statusMessage);
+  });
+  next();
+});
+
+app.get('/', async (req, res) => {
   try {
     const html = render({ location: req.url, initialData: {} });
     res.send(html);
   } catch (err) {
-    next(err);
+    sendNotFound(res);
     console.error(err);
   }
 });
 
-app.get('/products', async (req, res, next) => {
+app.get('/products', async (req, res) => {
   try {
     const initialData = await api.getProducts();
     const html = render({ location: req.url, initialData });
     res.send(html);
   } catch (err) {
-    next(err);
+    sendNotFound(res);
     console.error(err);
   }
 });
 
-app.get('/product/:id', async (req, res, next) => {
+app.get('/product/:id', async (req, res) => {
   try {
     const id = Number(req.params.id);
     const param = Number.isNaN(id) ? undefined : id;
     const initialData = await api.getProduct(param);
-    console.log(initialData);
     const html = render({ location: req.url, initialData });
     res.send(html);
   } catch (err) {
-    next(err);
+    sendNotFound(res);
     console.error(err);
   }
 });
 
-app.get('/api/products', async (_req, res, next) => {
+app.get('/api/products', async (_req, res) => {
   try {
     const data = await api.getProducts();
     res.send(data);
   } catch (err) {
-    next(err);
+    sendNotFound(res);
     console.error(err);
   }
 });
 
-app.get('*', async (req, res, next) => {
+app.get('*', async (_req, res, next) => {
   try {
-    const html = render({ location: req.url });
-    res.send(html);
+    sendNotFound(res);
   } catch (err) {
     next(err);
     console.error(err);
   }
 });
 
-const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => console.log(`server is listening on port ${PORT}`));
 
-const shutdownGracefully = (exitArg = 0) => server.close(() => {
+const shutdownGracefully = (exitArg = 0) => server.close(async () => {
+  await redisClient.disconnect();
   console.log('\n× server closed');
   process.exit(exitArg);
 });

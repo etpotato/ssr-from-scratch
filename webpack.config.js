@@ -8,6 +8,9 @@ const serverConfig = {
     __dirname: false,
   },
   entry: './src/server.js',
+  experiments: {
+    topLevelAwait: true,
+  },
   externalsPresets: { node: true },
   externals: [nodeExternals()],
   module: {

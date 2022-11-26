@@ -8,7 +8,7 @@
     "build": "cross-env NODE_ENV=production webpack",
     "build:stats": "cross-env NODE_ENV=production webpack --json=stats.json",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "cross-env NODE_ENV=production && node dist/server.bundle.js"
+    "serve": "cross-env NODE_ENV=production node dist/server.bundle.js"
   },
   "repository": {
     "type": "git",
@@ -30,7 +30,8 @@
     "node-fetch": "^2.6.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.4.3"
+    "react-router-dom": "^6.4.3",
+    "redis": "^4.5.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.2",
