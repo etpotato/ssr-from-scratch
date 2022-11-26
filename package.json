@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "rm -rf dist && webpack && concurrently \"webpack --watch\" \"nodemon dist/server.bundle.js\"",
+    "start": "rm -rf dist && webpack && cross-env REDIS_URL=0.0.0.0:6379 concurrently \"webpack --watch\" \"nodemon dist/server.bundle.js\"",
     "build": "cross-env NODE_ENV=production webpack",
     "build:stats": "cross-env NODE_ENV=production webpack --json=stats.json",
     "test": "echo \"Error: no test specified\" && exit 1",
