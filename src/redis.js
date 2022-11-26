@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const redis = require('redis');
 
 const { REDIS_URL } = process.env;

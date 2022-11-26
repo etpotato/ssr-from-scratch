@@ -55,7 +55,7 @@ app.use('/static', express.static(path.resolve(__dirname, 'public')));
 
 app.use((req, res, next) => {
   res.on('finish', () => {
-    console.log(req.method, decodeURI(req.url), res.statusCode, res.statusMessage);
+    console.log(req.method, decodeURI(req.url), res.statusCode, res.statusMessage, '\n');
   });
   next();
 });

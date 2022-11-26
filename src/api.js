@@ -1,13 +1,35 @@
+/* eslint-disable no-console */
 import fetch from 'node-fetch';
+
+import redisClient from './redis';
+
+const fetchWithRedisCache = async (key, endpoint) => {
+  const fromCache = await redisClient.get(key);
+  let data;
+
+  if (fromCache) {
+    console.log(`get from redis cache: ${key}`);
+    data = JSON.parse(fromCache);
+  } else {
+    console.log(`fetch: ${endpoint}`);
+    const res = await fetch(endpoint);
+    data = await res.json();
+    if (!res.ok) {
+      throw new Error(`${res.status}. ${data?.message || res.statusText}`);
+    }
+    redisClient.set(key, JSON.stringify(data));
+  }
+
+  return data;
+};
 
 export default {
   getProduct: async (id) => {
     try {
-      const res = await fetch(`https://dummyjson.com/products/${id}`);
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(`${res.status}. ${data?.message || res.statusText}`);
-      }
+      const key = `product/${id}`;
+      const endpoint = `https://dummyjson.com/products/${id}`;
+      const data = await fetchWithRedisCache(key, endpoint);
+
       return {
         product: { [data.id]: data },
       };
@@ -17,13 +39,11 @@ export default {
     }
   },
 
-  getProducts: async () => {
+  getProducts: async (limit = 20) => {
     try {
-      const res = await fetch('https://dummyjson.com/products/?limit=20');
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(`${res.status}. ${data?.message || res.statusText}`);
-      }
+      const key = `products/?limit=${limit}`;
+      const endpoint = `https://dummyjson.com/${key}`;
+      const data = await fetchWithRedisCache(key, endpoint);
       return data;
     } catch (err) {
       console.error('api error');
