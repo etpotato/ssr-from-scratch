@@ -3,7 +3,8 @@ const redis = require('redis');
 
 const { REDIS_URL } = process.env;
 
-const client = redis.createClient({
+// eslint-disable-next-line import/no-mutable-exports
+let client = redis.createClient({
   url: `redis://${REDIS_URL}`,
 });
 
@@ -16,9 +17,10 @@ const tryRedis = async () => {
   } catch (err) {
     console.log('REDIS connection error');
     console.error(err);
+    client = null;
   }
 };
 
-tryRedis();
+await tryRedis();
 
 export default client;

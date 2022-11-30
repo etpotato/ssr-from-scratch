@@ -3,7 +3,23 @@ import fetch from 'node-fetch';
 
 import redisClient from './redis';
 
+const noCacheFetch = async (endpoint) => {
+  console.log(`no-cache fetch: ${endpoint}`);
+  const res = await fetch(endpoint);
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(`${res.status}. ${data?.message || res.statusText}`);
+  }
+
+  return data;
+};
+
 const fetchWithRedisCache = async (key, endpoint) => {
+  if (!redisClient) {
+    const data = await noCacheFetch(endpoint);
+    return data;
+  }
+
   const fromCache = await redisClient.get(key);
   let data;
 

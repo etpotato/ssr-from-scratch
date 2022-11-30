@@ -116,7 +116,9 @@ app.get('*', async (_req, res, next) => {
 const server = app.listen(PORT, () => console.log(`server is listening on port ${PORT}`));
 
 const shutdownGracefully = (exitArg = 0) => server.close(async () => {
-  await redisClient.disconnect();
+  if (redisClient) {
+    await redisClient.disconnect();
+  }
   console.log('\n× server closed');
   process.exit(exitArg);
 });
