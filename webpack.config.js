@@ -1,5 +1,4 @@
 const path = require('path');
-const nodeExternals = require('webpack-node-externals');
 
 const serverConfig = {
   mode: 'development',
@@ -11,8 +10,6 @@ const serverConfig = {
   experiments: {
     topLevelAwait: true,
   },
-  externalsPresets: { node: true },
-  externals: [nodeExternals()],
   module: {
     rules: [{
       test: /\.js$/,
